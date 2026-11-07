@@ -13,6 +13,10 @@ GridGuide answers safety, restoration and billing questions from Brightvale's ow
 | Live dispatcher console | https://gridguide.vercel.app/dashboard |
 | Fictional Brightvale Electric site | https://gridguide.vercel.app/brightvale |
 
+## Works on any phone, even offline
+
+The Brightvale site is an **installable Progressive Web App**: "Install app" on Android and desktop Chrome or Edge, and Share then "Add to Home Screen" on iPhone. A service worker keeps pages and an **offline emergency page** with tap-to-call 911 and Brightvale numbers, because storms knock out mobile data. Live outage data is never cached. Every page passes axe WCAG 2.2 AA checks, with 44px tap targets and no horizontal scrolling down to 320px wide.
+
 ## How it works
 
 1. **Pre-chat workflow** collects the topic, ZIP code and a medical-equipment flag. "Safety emergency" goes straight to a safety stop.

@@ -27,6 +27,10 @@ Everything needed to submit GridGuide to the eGain "Build, Demo, and Take Home a
 - **eGain capabilities demonstrated:** tick all six (Knowledge-based answers, Published experience, Pre-chat workflow, Escalation workflow, Process workflow, Actions).
 - **Pre-existing templates, code, third-party assets:** "None pre-existing. Built during the hackathon: 10 knowledge articles, 51 sample transcripts, and a Next.js backend and dashboard on Vercel. Open-source and commercial tools used: Next.js, Tailwind CSS, Vercel hosting. All company names, phone numbers and data are fictional (555 numbers, .example email). AI coding assistants were used during development."
 
+**Bonus for the creativity and customer experience criterion:**
+- The Brightvale site installs as a PWA, works offline, and keeps an emergency page with tap-to-call numbers.
+- It is fully accessible (axe WCAG 2.2 AA, 0 issues) and built mobile first.
+
 ## How each requirement is met
 
 | # | Requirement | Where it lives |
