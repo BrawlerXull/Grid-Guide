@@ -12,6 +12,7 @@ Everything needed to submit GridGuide to the eGain "Build, Demo, and Take Home a
 | Project overview (what GridGuide is and what to try) | https://gridguide.vercel.app |
 | Live dispatcher console (shows every action the agent takes) | https://gridguide.vercel.app/dashboard |
 | Brightvale Electric homepage (fictional, used as demo background) | https://gridguide.vercel.app/brightvale |
+| Source code (private GitHub repo; pushes to `main` auto-deploy to Vercel) | https://github.com/BrawlerXull/Grid-Guide |
 | eGain agent | "GridGuide" in **AI Agent for Customer** (agent ID `d477ba83-83e2-4ae5-a6aa-1f484718fc74`) |
 
 ## Form answers
