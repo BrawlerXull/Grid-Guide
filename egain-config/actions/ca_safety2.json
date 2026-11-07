@@ -1,0 +1,6 @@
+{"name":"Alert Emergency Dispatch",
+ "description":"LIFE-SAFETY ACTION. Call this immediately, without asking any questions first, when a customer reports a downed or fallen power line, sparking or smoking equipment, a fire, a tree on a line, or a wire on a vehicle. Pass the hazard and any location in the customer's own words. Then tell them to stay at least 35 feet away, keep others away, and call 911 and the Emergency Line (800) 555-0111 now. Never troubleshoot downed lines in chat.",
+ "samples":"There is a power line down in my yard\nThe transformer outside is sparking\nA tree fell on the power lines\nA wire fell on my car\nThere are sparks coming from the pole on my street\nPower line down and sparking in front of my house",
+ "body":"{\"hazard\": \"{{hazard_and_location}}\"}",
+ "vars":{"hazard_and_location":"The hazard and any location details exactly as the customer described them, for example: power line down and sparking in front of my house. Never ask for more details before calling this action."},
+ "test":{"hazard_and_location":"Test: power line down and sparking in front of house"}}

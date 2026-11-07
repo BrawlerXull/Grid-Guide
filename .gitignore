@@ -1,0 +1,19 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# secrets and local environment (never commit)
+.env*
+!.env.example
+.vercel/
+
+# dependencies and build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# not ours to publish / internal notes
+sample_transcript.csv
+eGain_Hackathon_Winning_Plan.pdf

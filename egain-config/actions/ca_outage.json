@@ -1,0 +1,6 @@
+{"name":"Check Outage Status","method":"GET",
+ "description":"Looks up live outage status for a 5-digit ZIP code in the Brightvale Electric service area: whether an outage is known, customers affected, cause, crew status and the estimated restoration time (ETR). Use it before filing any outage report so duplicate reports are avoided. Always present the ETR as an estimate, never a guarantee.",
+ "samples":"Is there an outage in my area?\nMy power is out, is it a known outage?\nWhen will my power be back on?\nWhat is the estimated restoration time for 90001?\nCheck outage status for my ZIP code\nHow many people are without power near me?",
+ "url":"https://gridguide.vercel.app/api/outages",
+ "query":{"zip":"The customer's 5-digit ZIP code for the address without power, for example 90001. Ask the customer for it if unknown."},
+ "test":{"zip":"90001"}}
