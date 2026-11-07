@@ -1,9 +1,11 @@
-import { fmtTime, json, unauthorized } from "@/lib/gridguide";
+import { fmtTime, json, unauthorized, guard, rateLimited } from "@/lib/gridguide";
 
 /** Next available callback times (fictional). */
-export async function GET(req: Request) {
+async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "slots", 120);
+  if (limited) return limited;
   const base = Date.now() + 60 * 60_000;
   const slots = [0, 1, 2].map((i) => {
     const d = new Date(base + i * 45 * 60_000);
@@ -12,3 +14,5 @@ export async function GET(req: Request) {
   });
   return json({ ok: true, slots, nextSlot: slots[0].time, message: `Next available callback times: ${slots.map((s) => s.time).join(", ")}.` });
 }
+
+export const GET = guard(handle);

@@ -1,12 +1,14 @@
 import { kv } from "@/lib/store";
 import {
-  ERROR_ZIP, SEED_OUTAGES, TIMEOUT_ZIP, describeOutage, json, logEvent, normZip, pick, readInput, sleep, unauthorized,
+  ERROR_ZIP, SEED_OUTAGES, TIMEOUT_ZIP, describeOutage, json, logEvent, normZip, pick, readInput, sleep, unauthorized, guard, rateLimited,
 } from "@/lib/gridguide";
 
 /** Check outage status for a ZIP code. GET /api/outages?zip=90001 (POST with {"zip": "..."} also works). */
 async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "outages", 120);
+  if (limited) return limited;
   const input = await readInput(req);
   const zip = normZip(pick(input, "zip", "zipCode", "wsZip", "postalCode"));
   if (!zip) {
@@ -54,5 +56,5 @@ async function handle(req: Request) {
   });
 }
 
-export const GET = handle;
-export const POST = handle;
+export const GET = guard(handle);
+export const POST = guard(handle);

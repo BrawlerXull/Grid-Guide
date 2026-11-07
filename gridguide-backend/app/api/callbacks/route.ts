@@ -1,4 +1,4 @@
-import { digits, fmtTime, json, logEvent, maskPhone, pick, readInput, ref, unauthorized } from "@/lib/gridguide";
+import { digits, fmtTime, json, logEvent, maskPhone, pick, readInput, ref, unauthorized, guard, rateLimited } from "@/lib/gridguide";
 
 /**
  * Human handoff: book a callback (standard or Medical Priority) or route a request to Customer Care by email.
@@ -7,6 +7,8 @@ import { digits, fmtTime, json, logEvent, maskPhone, pick, readInput, ref, unaut
 async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "callbacks", 120);
+  if (limited) return limited;
   const input = await readInput(req);
   const channel = (pick(input, "channel", "contactMethod", "wsContact") || "callback").toLowerCase();
   const reason = pick(input, "reason", "topic", "summary", "wsTopic", "userQuery") || "General inquiry";
@@ -52,5 +54,5 @@ async function handle(req: Request) {
   });
 }
 
-export const POST = handle;
-export const GET = handle;
+export const POST = guard(handle);
+export const GET = guard(handle);

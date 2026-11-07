@@ -18,6 +18,8 @@ interface KV {
   pushEvent(value: Json, max: number): Promise<void>;
   events(limit: number): Promise<Json[]>;
   keys(pattern: string): Promise<string[]>;
+  /** Increment a counter that expires after `windowSeconds`; returns the new count. */
+  hit(key: string, windowSeconds: number): Promise<number>;
 }
 
 let _kv: KV | null = null;
@@ -62,6 +64,11 @@ function redisKV(r: Redis): KV {
     async keys(pattern) {
       return r.keys(pattern);
     },
+    async hit(key, windowSeconds) {
+      const n = await r.incr(key);
+      if (n === 1) await r.expire(key, windowSeconds);
+      return n;
+    },
   };
 }
 
@@ -99,6 +106,11 @@ function memoryKV(): KV {
     async keys(pattern) {
       const re = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
       return [...m.keys()].filter((k) => re.test(k));
+    },
+    async hit(key) {
+      const n = Number(m.get(key) ?? 0) + 1;
+      m.set(key, n);
+      return n;
     },
   };
 }

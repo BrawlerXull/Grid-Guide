@@ -37,6 +37,7 @@ node("node_medical1", "question.select", 1040, 120, {
     "text": "Does anyone at this address rely on powered medical equipment, like oxygen, dialysis or refrigerated medicine?",
     "skipIfPresent": True, "variableKey": "wsMedical",
     "options": [{"id": "opt_1", "label": "Yes", "value": "Yes"}, {"id": "opt_2", "label": "No", "value": "No"}]})
+node("node_medack01", "statement", 1210, -40, {"text": "Thank you for telling us. If anyone is in danger or the equipment has stopped, call 911 now. I'll make sure our Medical Priority team can reach you."})
 node("node_outageq1", "question.text", 1380, 120, {
     "text": "Thanks. In a few words, what's happening? For example: my power is out, or only part of my house has power.",
     "skipIfPresent": False, "variableKey": "userQuery", "placeholder": "Type your answer..."})
@@ -57,7 +58,8 @@ edge("node_topic001", "node_otherq01", "opt_4")
 edge("node_safety01", "node_safetyq1")
 edge("node_safetyq1", "node_send0001")
 edge("node_zip00001", "node_medical1")
-edge("node_medical1", "node_outageq1", "opt_1")
+edge("node_medical1", "node_medack01", "opt_1")
+edge("node_medack01", "node_outageq1")
 edge("node_medical1", "node_outageq1", "opt_2")
 edge("node_zip00001", "node_medical1", "onSkip")
 edge("node_medical1", "node_outageq1", "onSkip")

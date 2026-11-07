@@ -1,3 +1,6 @@
+import { timingSafeEqual } from "node:crypto";
+import { connection } from "next/server";
+import { unstable_rethrow } from "next/navigation";
 import { kv, STATS } from "./store";
 
 export const TZ = "America/Los_Angeles";
@@ -10,15 +13,64 @@ export const CONTACT = {
 
 /* ------------------------------------------------------------------ auth */
 
-/** Every agent-facing endpoint requires the shared API key (header x-api-key or Authorization: Bearer). */
+/** Constant-time string comparison (avoids leaking the key through response timing). */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a), bb = Buffer.from(b);
+  return ab.length === bb.length && timingSafeEqual(ab, bb);
+}
+
+/**
+ * Every agent-facing endpoint requires the shared API key in a header
+ * (`x-api-key`, or `Authorization: Bearer`). Keys in URLs are not accepted because URLs end up in logs.
+ */
 export function unauthorized(req: Request): Response | null {
   const expected = process.env.GRIDGUIDE_API_KEY;
-  if (!expected) return null; // not configured (local dev)
+  if (!expected) {
+    // Fail closed in production; allow local development without a key.
+    return process.env.VERCEL_ENV === "production"
+      ? json({ ok: false, error: "misconfigured", message: "Service is not configured." }, 503)
+      : null;
+  }
   const h = req.headers;
-  const bearer = h.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const key = h.get("x-api-key") || bearer || new URL(req.url).searchParams.get("key");
-  if (key === expected) return null;
+  const bearer = h.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+  const key = h.get("x-api-key") || bearer;
+  if (key && safeEqual(key, expected)) return null;
   return json({ ok: false, error: "unauthorized", message: "Missing or invalid API key." }, 401);
+}
+
+function clientIp(req: Request): string {
+  return (req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "unknown").trim();
+}
+
+/** Fixed-window rate limit per client IP. Returns a 429 response when the limit is exceeded. */
+export async function rateLimited(req: Request, bucket: string, limit: number, windowSeconds = 60): Promise<Response | null> {
+  try {
+    const slot = Math.floor(Date.now() / (windowSeconds * 1000));
+    const n = await kv().hit(`gg:rl:${bucket}:${clientIp(req)}:${slot}`, windowSeconds);
+    if (n > limit) {
+      return json({ ok: false, error: "rate_limited", message: "Too many requests. Please wait a moment and try again." }, 429);
+    }
+  } catch {
+    /* never block a customer because the limiter itself failed */
+  }
+  return null;
+}
+
+/** Wrap a route handler so unexpected failures return a friendly JSON error the agent can relay. */
+export function guard(handler: (req: Request) => Promise<Response>) {
+  return async (req: Request) => {
+    await connection(); // API responses are always request-time, never prerendered
+    try {
+      return await handler(req);
+    } catch (err) {
+      unstable_rethrow(err); // let Next.js internal control-flow errors through
+      console.error("gridguide route error", err);
+      return json(
+        { ok: false, status: "error", message: "Our system is temporarily unavailable. Please try again shortly or call Customer Service at (800) 555-0100." },
+        500,
+      );
+    }
+  };
 }
 
 /* ----------------------------------------------------------------- input */
@@ -42,9 +94,9 @@ export async function readInput(req: Request): Promise<Record<string, string>> {
       }
     }
   }
-  // trim and drop unresolved template placeholders like "{{wsZip}}"
+  // trim, strip control characters, cap length, and drop unresolved template placeholders like "{{wsZip}}"
   for (const k of Object.keys(out)) {
-    const v = out[k].trim();
+    const v = out[k].replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 300);
     if (/^\{\{.*\}\}$/.test(v) || v === "") delete out[k];
     else out[k] = v;
   }

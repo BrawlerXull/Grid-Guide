@@ -1,5 +1,5 @@
 import { kv } from "@/lib/store";
-import { digits, fmtDate, json, last4, logEvent, normZip, pick, readInput, ref, unauthorized } from "@/lib/gridguide";
+import { digits, fmtDate, json, last4, logEvent, normZip, pick, readInput, ref, unauthorized, guard, rateLimited } from "@/lib/gridguide";
 
 /**
  * Payment extension policy (matches knowledge doc 07):
@@ -10,6 +10,8 @@ import { digits, fmtDate, json, last4, logEvent, normZip, pick, readInput, ref, 
 async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "extensions", 120);
+  if (limited) return limited;
   const input = await readInput(req);
   const days = parseInt(digits(pick(input, "days", "extensionDays", "wsDays", "daysNeeded")) || "0", 10);
   const phone4 = last4(pick(input, "phoneLast4", "last4", "wsPhoneLast4", "phone"));
@@ -47,5 +49,5 @@ async function handle(req: Request) {
   });
 }
 
-export const POST = handle;
-export const GET = handle;
+export const POST = guard(handle);
+export const GET = guard(handle);

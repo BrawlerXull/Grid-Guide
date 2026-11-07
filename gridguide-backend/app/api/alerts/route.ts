@@ -1,10 +1,12 @@
 import { kv } from "@/lib/store";
-import { digits, json, logEvent, maskPhone, normZip, pick, readInput, unauthorized } from "@/lib/gridguide";
+import { digits, json, logEvent, maskPhone, normZip, pick, readInput, unauthorized, guard, rateLimited } from "@/lib/gridguide";
 
 /** Enroll a mobile number in restoration text alerts. */
 async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "alerts", 120);
+  if (limited) return limited;
   const input = await readInput(req);
   const phone = digits(pick(input, "phone", "mobile", "phoneNumber", "wsPhone"));
   const zip = normZip(pick(input, "zip", "zipCode", "wsZip"));
@@ -26,5 +28,5 @@ async function handle(req: Request) {
   });
 }
 
-export const POST = handle;
-export const GET = handle;
+export const POST = guard(handle);
+export const GET = guard(handle);

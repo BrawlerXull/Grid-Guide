@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "./components/site-header";
 import { CopyButton } from "./components/copy-button";
+import { ImpactEstimator } from "./components/impact-estimator";
 import { DEMO_URL, RULES, SCENARIOS } from "@/lib/site";
 
 const FEATURES = [
@@ -108,6 +109,21 @@ export default function Home() {
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* Business value */}
+        <section aria-labelledby="impact-title" className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+          <h2 id="impact-title" className="text-2xl font-semibold text-slate-900 dark:text-white">
+            Why it matters during a storm
+          </h2>
+          <p className="mt-2 max-w-3xl text-slate-600 dark:text-slate-300">
+            When thousands of homes lose power at once, phone lines fill up with people reporting outages the utility already knows
+            about. Meanwhile, the callers who really need a person, such as someone on oxygen or a family facing a downed line, wait in
+            the same queue. GridGuide handles the routine requests in chat, so people answer the urgent ones.
+          </p>
+          <div className="mt-6">
+            <ImpactEstimator />
+          </div>
         </section>
 
         {/* Try it */}

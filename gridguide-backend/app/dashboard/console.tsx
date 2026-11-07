@@ -133,6 +133,8 @@ export function Console() {
     ];
   }, [stats]);
 
+  const selfServed =
+    (stats?.report_filed ?? 0) + (stats?.duplicate_avoided ?? 0) + (stats?.extension_approved ?? 0) + (stats?.alert_signup ?? 0);
   const events = (feed?.events ?? []).filter((e) => filter === "all" || TYPES[e.type]?.group === filter);
   const totalCustomers = feed?.outages.reduce((a, o) => a + o.customersAffected, 0) ?? 0;
   const lastUpdated = now ? new Date(now).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) : "";
@@ -180,6 +182,16 @@ export function Console() {
         <h2 id="summary-title" className="sr-only">
           Summary of actions
         </h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-900 p-5 text-white dark:bg-slate-800">
+          <div>
+            <p className="text-sm font-medium text-amber-300">Calls kept off the hold line (estimate)</p>
+            <p className="mt-1 text-4xl font-semibold tabular-nums">{selfServed}</p>
+          </div>
+          <p className="max-w-md text-sm text-slate-300">
+            Tickets filed, duplicate reports avoided, extensions approved and alert sign-ups, each completed in chat instead of a phone
+            queue. Safety stops and human handoffs are not counted.
+          </p>
+        </div>
         <ul role="list" className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
           {tiles.map(({ label, value, note, icon: Icon }) => (
             <li key={label} className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">

@@ -20,7 +20,15 @@ export const metadata: Metadata = {
   },
   description:
     "GridGuide is an eGain AI agent that helps customers of Brightvale Electric (a fictional utility) report outages, stay safe, get more time to pay, and reach a person.",
+  metadataBase: new URL("https://gridguide.vercel.app"),
   applicationName: "Brightvale Electric · GridGuide",
+  openGraph: {
+    type: "website",
+    siteName: "GridGuide",
+    title: "GridGuide · AI storm support for Brightvale Electric",
+    description: "An eGain AI agent that takes real actions for storm-hit customers and knows when a person or 911 must take over.",
+  },
+  twitter: { card: "summary_large_image" },
   appleWebApp: {
     capable: true,
     title: "Brightvale",

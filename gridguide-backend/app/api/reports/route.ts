@@ -1,12 +1,14 @@
 import { kv } from "@/lib/store";
 import {
-  SEED_OUTAGES, describeOutage, json, last4, logEvent, normZip, pick, readInput, ref, unauthorized,
+  SEED_OUTAGES, describeOutage, json, last4, logEvent, normZip, pick, readInput, ref, unauthorized, guard, rateLimited,
 } from "@/lib/gridguide";
 
 /** File an outage report. Avoids duplicate tickets when the outage is already known. */
 async function handle(req: Request) {
   const denied = unauthorized(req);
   if (denied) return denied;
+  const limited = await rateLimited(req, "reports", 120);
+  if (limited) return limited;
   const input = await readInput(req);
   const zip = normZip(pick(input, "zip", "zipCode", "wsZip"));
   const phone4 = last4(pick(input, "phoneLast4", "last4", "wsPhoneLast4", "phone"));
@@ -28,7 +30,7 @@ async function handle(req: Request) {
   }
 
   const ticketId = ref("BV");
-  await kv().set(`gg:report:${zip}`, { ticketId, at: new Date().toISOString() }, 60 * 60 * 24);
+  await kv().set(`gg:report:${zip}`, { ticketId, at: new Date().toISOString() }, 60 * 60 * 2);
   await logEvent("report_filed", `${partial ? "Partial outage" : "Outage"} report ${ticketId} filed for ${zip}`, { zip, ticketId, partial, phone: `***-${phone4}` });
   return json({
     ok: true, status: "filed", zip, ticketId, partial,
@@ -36,5 +38,5 @@ async function handle(req: Request) {
   });
 }
 
-export const POST = handle;
-export const GET = handle;
+export const POST = guard(handle);
+export const GET = guard(handle);
