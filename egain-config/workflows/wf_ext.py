@@ -45,4 +45,13 @@ w.edge("node_phone001", "node_apicb001")
 w.edge("node_apicb001", "node_saycb001", "success")
 w.edge("node_apicb001", "node_sayerr01", "onError")
 w.edge("node_apicb001", "node_sayerr01", "onTimeout")
+
+# Hand the conversation back to GridGuide: the customer's next message becomes the agent's new question
+w.ask_text("node_anyelse1", 3520, 0, "Is there anything else I can help you with?", "userQuery", placeholder="Type your question, or say no thanks")
+w.to_agent("node_toagent1", 3840, 0, ["wsDecision", "wsCaseId"], send_query=True)
+w.edge("node_anyelse1", "node_toagent1")
+w.edge("node_sayok001", "node_anyelse1")
+w.edge("node_saycb001", "node_anyelse1")
+w.edge("node_nocb0001", "node_anyelse1")
+w.edge("node_sayerr01", "node_anyelse1")
 w.dump(sys.argv[1])

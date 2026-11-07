@@ -84,4 +84,12 @@ w.edge("node_phone001", "node_apialt01", "onSkip")
 w.edge("node_apialt01", "node_sayalt01", "success")
 w.edge("node_apialt01", "node_sayerr01", "onError")
 w.edge("node_apialt01", "node_sayerr01", "onTimeout")
+
+# Hand the conversation back to GridGuide: the customer's next message becomes the agent's new question
+w.ask_text("node_anyelse1", 4640, 0, "Is there anything else I can help you with?", "userQuery", placeholder="Type your question, or say no thanks")
+w.to_agent("node_toagent1", 4960, 0, ["wsZip", "wsTicketId", "wsOutageStatus", "wsEtr", "wsMedical"], send_query=True)
+w.edge("node_anyelse1", "node_toagent1")
+w.edge("node_sayalt01", "node_anyelse1")
+w.edge("node_saynoa01", "node_anyelse1")
+w.edge("node_sayerr01", "node_anyelse1")
 w.dump(sys.argv[1])

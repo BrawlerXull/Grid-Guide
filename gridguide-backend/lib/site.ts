@@ -32,9 +32,9 @@ export const SCENARIOS: Scenario[] = [
   {
     id: "new",
     title: "New outage, real ticket",
-    steps: "Choose “Power outage”, enter ZIP 90002, pick “Breakers are fine…”, then last 4 digits 0178.",
-    copy: "90002",
-    expect: "A ticket such as BV-12345 is filed, then you can sign up for restoration texts.",
+    steps: "Choose “Power outage”, enter a ZIP that isn't listed as an outage (for example 90123), pick “Breakers are fine…”, then any last 4 digits.",
+    copy: "90123",
+    expect: "A ticket such as BV-12345 is filed. If someone reported the same ZIP in the last 2 hours, GridGuide adds you to that ticket instead, which is the duplicate check working.",
     shows: "Process workflow tied to an intent",
   },
   {
@@ -47,16 +47,16 @@ export const SCENARIOS: Scenario[] = [
   {
     id: "medical",
     title: "Medical Priority",
-    steps: "Type “my dad uses an oxygen concentrator and our power is out, my number is 555-0142”.",
-    expect: "A Medical Priority callback within about 15 minutes, with a reminder to call 911 if anyone is in danger.",
+    steps: "Choose “Power outage”, ZIP 90001, and answer “Yes” to medical equipment. Or type “my dad uses an oxygen concentrator and our power is out”.",
+    expect: "A 911 reminder, an honest note that priority doesn't mean faster restoration, and a Medical Priority callback within about 15 minutes.",
     shows: "Protecting vulnerable customers",
   },
   {
     id: "billing",
     title: "More time to pay",
-    steps: "Choose “Billing and payments”, ask for more time, enter 10 days and any 4 digits. Try 25 days next.",
+    steps: "Choose “Billing and payments”, ask for more time, enter 10 days and any 4 digits you haven't used before. Then try 25 days, or 60.",
     copy: "10",
-    expect: "10 days is approved with a new due date. 25 days goes to Customer Care review, never auto-approved.",
+    expect: "10 days is approved with a new due date. 25 days goes to Customer Care review, 60 days gets a payment-plan offer. Reusing the same 4 digits shows the once-a-year rule.",
     shows: "Bounded autonomy",
   },
   {

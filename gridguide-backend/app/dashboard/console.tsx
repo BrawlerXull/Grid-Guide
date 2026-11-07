@@ -336,9 +336,9 @@ export function Console() {
             <dl className="mt-3 space-y-3 text-sm">
               {[
                 { value: "90001", label: "ZIP code", desc: "Known outage, no duplicate ticket" },
-                { value: "90002", label: "ZIP code", desc: "New outage, a real ticket is filed" },
+                { value: "90123", label: "ZIP code", desc: "New outage, a real ticket is filed" },
                 { value: "90009", label: "ZIP code", desc: "Simulated system error" },
-                { value: "0178", label: "last 4 digits", desc: "Any 4 digits work" },
+                { value: "0178", label: "last 4 digits", desc: "Any 4 digits; reuse them to see the once-a-year rule" },
               ].map((t) => (
                 <div key={t.value} className="flex items-center justify-between gap-3">
                   <dt className="text-slate-700 dark:text-slate-300">{t.desc}</dt>
