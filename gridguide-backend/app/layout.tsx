@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { PwaRuntime } from "./components/pwa";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,19 @@ export const metadata: Metadata = {
   },
   description:
     "GridGuide is an eGain AI agent that helps customers of Brightvale Electric (a fictional utility) report outages, stay safe, get more time to pay, and reach a person.",
+  applicationName: "Brightvale Electric · GridGuide",
+  appleWebApp: {
+    capable: true,
+    title: "Brightvale",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: true },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0b1f3a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to main content
         </a>
         {children}
+        <PwaRuntime />
       </body>
     </html>
   );

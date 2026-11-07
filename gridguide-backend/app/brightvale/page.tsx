@@ -17,6 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import { CONTACT, DEMO_URL } from "@/lib/site";
+import { InstallButton } from "../components/pwa";
 import { SEED_OUTAGES, describeOutage } from "@/lib/gridguide";
 
 export const metadata: Metadata = {
@@ -126,37 +127,69 @@ async function OutageRows() {
   );
 }
 
+async function OutageCards() {
+  const outages = await liveOutages();
+  return (
+    <ul role="list" className="space-y-3">
+      {outages.map((o) => (
+        <li key={o.outageId} className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <h3 className="font-semibold">
+              {o.area} · {o.zip}
+            </h3>
+            <p className="text-sm tabular-nums text-slate-700">{o.customersAffected.toLocaleString("en-US")} customers</p>
+          </div>
+          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+            <dt className="text-slate-600">Cause</dt>
+            <dd>{o.cause}</dd>
+            <dt className="text-slate-600">Crew</dt>
+            <dd>{o.crewStatus}</dd>
+            <dt className="text-slate-600">Estimate</dt>
+            <dd>{o.etr}</dd>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Brightvale() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Emergency banner */}
-      <div role="region" aria-label="Storm emergency notice" className="bg-red-700 px-4 py-2.5 text-center text-sm text-white">
+      <div role="region" aria-label="Storm emergency notice" className="bg-red-700 px-4 py-0.5 text-center text-sm text-white">
         <Siren aria-hidden="true" className="mr-1.5 inline h-4 w-4 align-[-2px]" />
         <strong>Storm alert:</strong> see a downed line or sparks? Stay 35 feet away and call{" "}
-        <a href="tel:911" className="font-semibold underline underline-offset-2">
+        <a href="tel:911" className="inline-flex min-h-11 min-w-11 items-center justify-center font-semibold underline underline-offset-2">
           911
         </a>{" "}
         and{" "}
-        <a href={`tel:${CONTACT.emergency.tel}`} className="font-semibold underline underline-offset-2">
+        <a href={`tel:${CONTACT.emergency.tel}`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-2">
           {CONTACT.emergency.label}
         </a>
         .
       </div>
 
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <a href="#main" className="flex items-center gap-2 rounded-md">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 pt-2 pb-1 sm:px-6 md:py-4">
+          <a href="#main" className="flex min-h-11 items-center gap-2 rounded-md">
             <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-slate-950">
               <Zap className="h-5 w-5" />
             </span>
             <span className="text-lg font-semibold">Brightvale Electric</span>
           </a>
-          <nav aria-label="Brightvale Electric">
-            <ul className="flex flex-wrap gap-1 text-sm">
+          <div className="md:order-last">
+            <InstallButton compact />
+          </div>
+          <nav aria-label="Brightvale Electric" className="order-last -mx-1 w-full md:order-none md:mx-0 md:w-auto">
+            <ul className="flex gap-1 overflow-x-auto px-1 pb-1 text-sm [scrollbar-width:none] md:overflow-visible md:pb-0">
               {NAV.map((n) => (
-                <li key={n.href}>
-                  <a href={n.href} className="inline-flex min-h-10 items-center rounded-lg px-3 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950">
+                <li key={n.href} className="shrink-0">
+                  <a
+                    href={n.href}
+                    className="inline-flex min-h-11 items-center whitespace-nowrap rounded-lg px-3 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                  >
                     {n.label}
                   </a>
                 </li>
@@ -234,7 +267,12 @@ export default function Brightvale() {
               If your area is listed, we already know about it and crews are working on it. You don&apos;t need to report it again. Ask
               GridGuide to text you when the estimate changes.
             </p>
-            <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <div className="mt-6 sm:hidden">
+              <Suspense fallback={<p className="text-sm text-slate-600">Loading current outages…</p>}>
+                <OutageCards />
+              </Suspense>
+            </div>
+            <div className="mt-6 hidden overflow-x-auto rounded-xl border border-slate-200 bg-white sm:block">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <caption className="sr-only">Current outages with cause, crew status and estimated restoration time</caption>
                 <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-700">
@@ -369,7 +407,7 @@ export default function Brightvale() {
             <li className="rounded-xl border border-slate-200 p-5">
               <p className="font-semibold">Emergencies, 24/7</p>
               <p className="mt-1 text-sm text-slate-600">Downed lines, sparks or fire</p>
-              <a href={`tel:${CONTACT.emergency.tel}`} className="mt-3 inline-flex min-h-10 items-center gap-2 font-semibold text-red-800 underline underline-offset-2">
+              <a href={`tel:${CONTACT.emergency.tel}`} className="mt-3 inline-flex min-h-11 items-center gap-2 font-semibold text-red-800 underline underline-offset-2">
                 <Phone aria-hidden="true" className="h-4 w-4" />
                 {CONTACT.emergency.label}
               </a>
@@ -377,7 +415,7 @@ export default function Brightvale() {
             <li className="rounded-xl border border-slate-200 p-5">
               <p className="font-semibold">Customer Service</p>
               <p className="mt-1 text-sm text-slate-600">7 AM to 8 PM, Monday to Saturday</p>
-              <a href={`tel:${CONTACT.service.tel}`} className="mt-3 inline-flex min-h-10 items-center gap-2 font-semibold underline underline-offset-2">
+              <a href={`tel:${CONTACT.service.tel}`} className="mt-3 inline-flex min-h-11 items-center gap-2 font-semibold underline underline-offset-2">
                 <Phone aria-hidden="true" className="h-4 w-4" />
                 {CONTACT.service.label}
               </a>
@@ -385,7 +423,7 @@ export default function Brightvale() {
             <li className="rounded-xl border border-slate-200 p-5">
               <p className="font-semibold">Email</p>
               <p className="mt-1 text-sm text-slate-600">Replies within 1 business day</p>
-              <a href={`mailto:${CONTACT.email}`} className="mt-3 inline-flex min-h-10 items-center gap-2 break-all font-semibold underline underline-offset-2">
+              <a href={`mailto:${CONTACT.email}`} className="mt-3 inline-flex min-h-11 items-center gap-2 break-all font-semibold underline underline-offset-2">
                 <Mail aria-hidden="true" className="h-4 w-4 shrink-0" />
                 {CONTACT.email}
               </a>
