@@ -17,3 +17,6 @@ out/
 # not ours to publish / internal notes
 sample_transcript.csv
 eGain_Hackathon_Winning_Plan.pdf
+
+# Demo video build (local only, never pushed)
+demo-video/

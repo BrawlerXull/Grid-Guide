@@ -1,4 +1,4 @@
-import { digits, fmtTime, json, logEvent, maskPhone, pick, readInput, ref, unauthorized, guard, rateLimited } from "@/lib/gridguide";
+import { digits, json, logEvent, maskPhone, pick, readInput, ref, unauthorized, guard, rateLimited } from "@/lib/gridguide";
 
 /**
  * Human handoff: book a callback (standard or Medical Priority) or route a request to Customer Care by email.
@@ -40,18 +40,39 @@ async function handle(req: Request) {
   const date = pick(input, "date", "wsDate", "callbackDate");
   const time = pick(input, "time", "wsTime", "callbackTime");
   const dayWord = /\b(today|tonight|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|asap|as soon as possible|next available)\b/i;
-  const slot = date && time
-    ? `${date} at ${time}`
-    : time
-      ? (dayWord.test(time) ? time : `today at ${time}`)
-      : date
-        ? `${date} at the next available time`
-        : `today at ${fmtTime(new Date(Date.now() + 2 * 3600_000))}`;
-  await logEvent("callback_booked", `Callback ${callbackId} booked for ${maskPhone(phone)}: ${slot}`, { callbackId, phone: maskPhone(phone), slot, reason });
+  let slot: string;
+  if (date && time) slot = `${date} at ${time}`;
+  else if (time) slot = rollPastTime(dayWord.test(time) ? time : `today at ${time}`);
+  else if (date) slot = `${date} at the next available time`;
+  else slot = "";
+
+  const who = maskPhone(phone);
+  const context = "will already have our conversation, so you won't need to repeat yourself.";
+  if (!slot) {
+    // No time requested: the next free specialist calls back. Customer Service runs 24 hours during storm emergencies.
+    await logEvent("callback_booked", `Callback ${callbackId} booked for ${who}: next available, within 2 hours`, { callbackId, phone: who, slot: "next available", reason });
+    return json({
+      ok: true, status: "booked", callbackId, slot: "next available", priority: false,
+      message: `Your callback is booked (reference ${callbackId}). The next available Customer Care specialist will call ${who} within about 2 hours; we're answering 24 hours a day during the storm emergency. They ${context}`,
+    });
+  }
+  await logEvent("callback_booked", `Callback ${callbackId} booked for ${who}: ${slot}`, { callbackId, phone: who, slot, reason });
   return json({
     ok: true, status: "booked", callbackId, slot, priority: false,
-    message: `Your callback is booked for ${slot} (reference ${callbackId}). A Customer Care specialist will call ${maskPhone(phone)} and will already have our conversation, so you won't need to repeat yourself.`,
+    message: `Your callback is booked for ${slot} (reference ${callbackId}). A Customer Care specialist will call ${who} and ${context}`,
   });
+}
+
+/** "today at 3 PM" after 3 PM has passed (Brightvale time) becomes "tomorrow at 3 PM". */
+function rollPastTime(slot: string): string {
+  const m = slot.match(/^\s*today\s+at\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\s*$/i);
+  if (!m) return slot;
+  let hour = Number(m[1]) % 12;
+  if (/^p/i.test(m[3])) hour += 12;
+  const minute = Number(m[2] || 0);
+  const now = new Date().toLocaleTimeString("en-GB", { timeZone: "America/Los_Angeles", hour12: false, hour: "2-digit", minute: "2-digit" });
+  const [nh, nm] = now.split(":").map(Number);
+  return nh * 60 + nm >= hour * 60 + minute ? slot.replace(/today/i, "tomorrow") : slot;
 }
 
 export const POST = guard(handle);
