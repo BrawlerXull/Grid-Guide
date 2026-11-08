@@ -24,14 +24,15 @@ async function handle(req: Request) {
 
   const seeded = SEED_OUTAGES[zip];
   if (seeded) {
-    await logEvent("outage_check", `Outage check for ${zip}: known outage ${seeded.outageId}`, { zip, outageId: seeded.outageId });
+    // The customer gets the live status instead of filing (or calling in) a duplicate report
+    await logEvent("duplicate_avoided", `Known outage ${seeded.outageId} shared for ${zip}: no duplicate ticket`, { zip, outageId: seeded.outageId });
     return json({ ok: true, ...describeOutage(seeded) });
   }
 
   // An outage reported earlier through GridGuide for this ZIP
   const reported = await kv().get<{ ticketId: string; at: string }>(`gg:report:${zip}`);
   if (reported) {
-    await logEvent("outage_check", `Outage check for ${zip}: already reported (${reported.ticketId})`, { zip });
+    await logEvent("duplicate_avoided", `Outage at ${zip} already reported (${reported.ticketId}): no duplicate ticket`, { zip });
     return json({
       ok: true,
       status: "reported",
