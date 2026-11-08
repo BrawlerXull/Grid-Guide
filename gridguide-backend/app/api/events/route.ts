@@ -8,7 +8,13 @@ async function handle(req: Request) {
   const store = kv();
   const [events, stats] = await Promise.all([store.events(60), store.hgetall(STATS)]);
   const outages = Object.values(SEED_OUTAGES).map((o) => describeOutage(o));
-  return json({ events, stats, outages, storage: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL ? "redis" : "memory" });
+  return json({
+    events,
+    stats,
+    outages,
+    storage: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL ? "redis" : "memory",
+    environment: process.env.VERCEL_ENV || "local",
+  });
 }
 
 export const GET = guard(handle);
